@@ -133,14 +133,14 @@ command_setquality(size_t index)
                                 .writefln(index, quality_table.length);
                 return;
         }
-        configuration.quality = quality_table[index];
-        "quality `%s` successfully set".writefln(quality_table[index]);
+        quality_table[index].command_setquality_string;
 }
 
 void
 command_setquality_string(immutable string quality)
 {
         configuration.quality = quality;
+        "quality `%s` successfully set".writefln(quality);
 }
 
 void
