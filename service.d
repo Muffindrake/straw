@@ -9,7 +9,7 @@ struct SVC {
         string user_name;
         string user_id;
 
-        string delegate(immutable ref string) username_to_url;
+        string delegate(string) username_to_url;
         void function() update;
         string function(size_t) browse;
         void function() fetch;
@@ -28,7 +28,7 @@ SVC_TWITCH: {
         ident: "twitch",
         url_api_base: "https://api.twitch.tv/helix/",
         api: "onsyu6idu0o41dl4ixkofx6pqq7ghn",
-        username_to_url: (immutable ref string name) {
+        username_to_url: (string name) {
                 import std.format : format;
                 import std.string : strip;
                 import std.uri : encode;
@@ -40,7 +40,7 @@ SVC_PICARTO: {
         name_short: "PTV",
         ident: "picarto",
         url_api_base: "https://api.picarto.tv/v1/",
-        username_to_url: (immutable ref string name) {
+        username_to_url: (string name) {
                 import std.format : format;
                 import std.string : strip;
                 import std.uri : encode;

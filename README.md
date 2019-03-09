@@ -37,5 +37,3 @@ just fine by compiling all `*.d` files together using any other D compiler.
 
 # TODO
 - rate limiting
-- investigate segmentation fault related to users with an excessive amount of
-  follows (probably related to rate limiting)

@@ -1,5 +1,8 @@
 PREFIX ?= /usr/local
-OPTLEVEL ?= -O3 -release -mcpu=skylake -mattr=+skylake
+OPTLEVEL ?= -O3 -release
+ifeq ($(NATIVE), 1)
+OPTLEVEL += -mcpu=skylake -mattr=+skylake
+endif
 DC = ldc2
 
 .PHONY: all clean install

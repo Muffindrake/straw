@@ -51,7 +51,7 @@ inf:
         foreach (i, ref e; page[page_index][0 .. $ - 1])
                 a.put("id=%s&".format(e));
         a.put("id=%s".format(page[page_index][$ - 1]));
-        svc_ttv_fetch_default(res, url);
+        res = url.svc_ttv_fetch_default;
         JSONValue json = res.parseJSON;
         if ("data" !in json || json["data"].type != JSONType.array)
                 throw new JSONException("invalid json");
@@ -69,7 +69,7 @@ inf:
 void
 svc_ttv_match_game_id()
 {
-        foreach (i, ref e; svc_ttv_store)
+        foreach (i, ref e; svc_ttv_store) if (e.game_id in svc_ttv_games)
                 e.game = svc_ttv_games[e.game_id];
 }
 
@@ -81,11 +81,13 @@ svc_ttv_fetch_user_id_from_name(immutable string name)
 
         url = "%susers?login=%s".format(services[SVC_TWITCH].url_api_base,
                         name);
-        svc_ttv_fetch_default(res, url);
+        res = url.svc_ttv_fetch_default;
         JSONValue json = res.parseJSON;
         if ("data" !in json || json["data"].type != JSONType.array)
                 throw new JSONException("invalid json");
-        const (JSONValue)* data = "data" in json;
+        const auto data = "data" in json;
+        if (!data.array.length)
+                throw new JSONException("invalid json");
         if ("id" !in data.array[0]
                 || data.array[0]["id"].type != JSONType.string)
                 throw new JSONException("invalid json");
@@ -109,11 +111,11 @@ inf:
                                 services[SVC_TWITCH].user_id,
                                 page_token
                                 ? "&after=%s".format(page_token) : "");
-        svc_ttv_fetch_default(res, url);
+        res = url.svc_ttv_fetch_default;
         JSONValue json = res.parseJSON;
         if ("data" !in json || json["data"].type != JSONType.array)
                 throw new JSONException("invalid json");
-        const (JSONValue)* data = "data" in json;
+        const auto data = "data" in json;
         foreach (i, ref e; data.array) {
                 if ("to_id" !in e || e["to_id"].type != JSONType.string)
                         throw new JSONException("invalid json");
@@ -130,17 +132,22 @@ inf:
 }
 
 private
-void
-svc_ttv_fetch_default(ref char[] res, ref string url)
+char[]
+svc_ttv_fetch_default(string url)
 {
+        import std.utf : validate;
+        char[] ret;
+
         url = url.encode;
         auto client = HTTP(url);
         client.addRequestHeader("Client-ID", services[SVC_TWITCH].api);
         client.onReceive = (ubyte[] data) {
-                res = cast (char[]) data;
+                ret = cast (char[]) data;
+                ret.validate;
                 return data.length;
         };
         client.perform;
+        return ret.dup;
 }
 
 void
@@ -173,7 +180,7 @@ inf:
         foreach (i, ref e; follows[page_index][0 .. $ - 1])
                 a.put("user_id=%s&".format(e));
         a.put("user_id=%s".format(follows[page_index][$ - 1]));
-        svc_ttv_fetch_default(res, url);
+        res = url.svc_ttv_fetch_default;
         JSONValue json = res.parseJSON;
         if ("data" !in json || json["data"].type != JSONType.array)
                 throw new JSONException("invalid json");
