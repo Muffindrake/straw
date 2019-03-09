@@ -142,12 +142,12 @@ svc_ttv_fetch_default(string url)
         auto client = HTTP(url);
         client.addRequestHeader("Client-ID", services[SVC_TWITCH].api);
         client.onReceive = (ubyte[] data) {
-                ret = cast (char[]) data;
+                ret = cast (char[]) data.dup;
                 ret.validate;
                 return data.length;
         };
         client.perform;
-        return ret.dup;
+        return ret;
 }
 
 void
