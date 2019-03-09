@@ -203,9 +203,12 @@ inf:
 void
 svc_ttv_update()
 {
+        import std.algorithm.sorting : sort;
+
         services[SVC_TWITCH].user_id = services[SVC_TWITCH].user_name
                         .svc_ttv_fetch_user_id_from_name;
         svc_ttv_fetch_information;
+        svc_ttv_store.sort!("a.username.toUpper < b.username.toUpper");
         svc_ttv_fetch_game_by_ids;
         svc_ttv_match_game_id;
 }
