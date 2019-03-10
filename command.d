@@ -187,6 +187,19 @@ command_browse_username(immutable string name)
 }
 
 void
+command_getquality(size_t index)
+{
+        import quality;
+
+        string s = services[configuration.service_current].browse(index);
+        if (!s) {
+                "no such index %s in the service store".writefln(index);
+                return;
+        }
+        s.command_getquality_username;
+}
+
+void
 command_getquality_username(immutable string name)
 {
         import external;

@@ -46,6 +46,9 @@ input_handle(ref char[] buf)
         case cmd_user_set:
                 args[1].idup.command_user_set;
                 break;
+        case cmd_getquality:
+                to!size_t(args[1]).command_getquality;
+                break;
         case cmd_getquality_with_username:
                 args[1].idup.command_getquality_username;
                 break;
