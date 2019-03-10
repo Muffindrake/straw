@@ -19,12 +19,26 @@ input_prompt(ref char[] buf, immutable string message, immutable string p)
         return ret;
 }
 
+private
+size_t
+convert_size(const string s)
+{
+        import std.conv : to;
+        import std.exception;
+        size_t ret;
+
+        try
+                ret = to!size_t(s);
+        catch (Exception)
+                ret = 0;
+        return ret;
+}
+
 void
 input_handle(ref char[] buf)
 {
         import std.array : split;
         import std.stdio;
-        import std.conv : to;
         char[][] args = buf.split(' ');
 
         if (!args.length)
@@ -47,25 +61,25 @@ input_handle(ref char[] buf)
                 args[1].idup.command_user_set;
                 break;
         case cmd_getquality:
-                to!size_t(args[1]).command_getquality;
+                args[1].idup.convert_size.command_getquality;
                 break;
         case cmd_getquality_with_username:
                 args[1].idup.command_getquality_username;
                 break;
         case cmd_browse:
-                to!size_t(args[1]).command_browse;
+                args[1].idup.convert_size.command_browse;
                 break;
         case cmd_browse_with_username:
                 args[1].idup.command_browse_username;
                 break;
         case cmd_setquality:
-                to!size_t(args[1]).command_setquality;
+                args[1].idup.convert_size.command_setquality;
                 break;
         case cmd_setquality_string:
                 args[1].idup.command_setquality_string;
                 break;
         case cmd_service:
-                to!size_t(args[1]).command_service;
+                args[1].idup.convert_size.command_service;
                 break;
         case cmd_service_with_ident:
                 args[1].idup.command_service_ident;
@@ -74,7 +88,7 @@ input_handle(ref char[] buf)
                 args[1].idup.command_usage;
                 break;
         case cmd_run:
-                to!size_t(args[1]).command_run;
+                args[1].idup.convert_size.command_run;
                 break;
         case cmd_run_with_username:
                 args[1].idup.command_run_with_username;
