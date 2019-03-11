@@ -186,7 +186,7 @@ retry:
                 return data.length;
         };
         try
-                client.perform(Yes.throwOnError);
+                client.perform;
         catch (HTTPStatusException e)
                 if (e.status == 429) {
                         Thread.sleep(seconds(10));
@@ -194,7 +194,6 @@ retry:
                 } else {
                         throw e;
                 }
-        ret.writeln;
         ret.validate;
         return ret;
 }
