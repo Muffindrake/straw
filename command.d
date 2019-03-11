@@ -267,14 +267,15 @@ command_run(size_t index)
                 "no such index %s in current service store".writefln(index);
                 return;
         }
-        services[configuration.service_current].username_to_url(s)
-                        .command_run_with_username;
+        s.command_run_with_username;
 }
 
 void
-command_run_with_username(immutable string url)
+command_run_with_username(immutable string name)
 {
         import external;
+        string url = services[configuration.service_current]
+                        .username_to_url(name);
 
         "running stream %s in external video player".writefln(url);
         url.mpv_run(configuration.quality);
