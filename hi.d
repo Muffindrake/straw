@@ -57,6 +57,9 @@ input_handle(ref char[] buf)
         if (args.length < 2)
                 goto fail;
         switch (args[0]) {
+        case cmd_user_get:
+                args[1].idup.command_user_get;
+                break;
         case cmd_user_set:
                 args[1].idup.command_user_set;
                 break;

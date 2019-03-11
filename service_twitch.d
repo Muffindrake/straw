@@ -82,7 +82,7 @@ svc_ttv_fetch_user_id_from_name(immutable string name)
         url = "%susers?login=%s".format(services[SVC_TWITCH].url_api_base,
                         name);
         res = url.svc_ttv_fetch_default;
-        JSONValue json = res.parseJSON;
+        auto json = res.parseJSON;
         if ("data" !in json || json["data"].type != JSONType.array)
                 throw new JSONException("invalid json");
         const auto data = "data" in json;
@@ -112,7 +112,7 @@ inf:
                                 page_token
                                 ? "&after=%s".format(page_token) : "");
         res = url.svc_ttv_fetch_default;
-        JSONValue json = res.parseJSON;
+        auto json = res.parseJSON;
         if ("data" !in json || json["data"].type != JSONType.array)
                 throw new JSONException("invalid json");
         const auto data = "data" in json;
@@ -181,10 +181,10 @@ inf:
                 a.put("user_id=%s&".format(e));
         a.put("user_id=%s".format(follows[page_index][$ - 1]));
         res = url.svc_ttv_fetch_default;
-        JSONValue json = res.parseJSON;
+        auto json = res.parseJSON;
         if ("data" !in json || json["data"].type != JSONType.array)
                 throw new JSONException("invalid json");
-        const (JSONValue)* data = "data" in json;
+        const auto data = "data" in json;
         foreach (i, ref e; data.array) {
                 if ("user_name" !in e
                         || e["user_name"].type != JSONType.string
@@ -230,4 +230,25 @@ svc_ttv_listing()
         }
         foreach (i, ref e; svc_ttv_store)
                 "%02s %-12s <%s> %s".writefln(i, e.username, e.game, e.status);
+}
+
+void
+svc_ttv_info(string name)
+{
+        string url;
+        char[] res;
+
+        url = "%susers?login=%s".format(services[SVC_TWITCH].url_api_base
+                        , name.encode);
+        res = url.svc_ttv_fetch_default;
+        auto json = res.parseJSON;
+        if ("data" !in json || json["data"].type != JSONType.array)
+                throw new JSONException("invalid json");
+        const auto data = "data" in json;
+        if (!data.array.length)
+                return;
+        foreach (ref i, ref e; data.array[0].object)
+                "%18s: %s".writefln(i, e.type == JSONType.string
+                                ? e.str : e.toString);
+
 }

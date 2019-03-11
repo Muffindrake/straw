@@ -25,6 +25,7 @@ enum {
         cmd_setquality = "setq",
         cmd_setquality_string = "setqs",
         cmd_usage = "usage",
+        cmd_user_get = "info",
         cmd_user_set = "user"
 }
 
@@ -65,6 +66,7 @@ commands[cmd_setquality] = CMD(1, "set configuration quality by index");
 commands[cmd_setquality_string] = CMD(1,
         "set configuration quality using string");
 commands[cmd_usage] = CMD(1, "display usage information for a given command");
+commands[cmd_user_get] = CMD(1, "display channel information");
 commands[cmd_user_set] = CMD(1, "set current username on service");
 }
 
@@ -276,4 +278,10 @@ command_run_with_username(immutable string url)
 
         "running stream %s in external video player".writefln(url);
         url.mpv_run(configuration.quality);
+}
+
+void
+command_user_get(immutable string name)
+{
+        services[configuration.service_current].info(name);
 }

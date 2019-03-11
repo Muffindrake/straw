@@ -14,6 +14,7 @@ struct SVC {
         string function(size_t) browse;
         void function() fetch;
         void function() listing;
+        void function(string) info;
 }
 
 enum {
@@ -57,4 +58,5 @@ static this()
         services[SVC_TWITCH].browse = &svc_ttv_browse;
         services[SVC_TWITCH].fetch = &svc_ttv_update;
         services[SVC_TWITCH].listing = &svc_ttv_listing;
+        services[SVC_TWITCH].info = &svc_ttv_info;
 }
