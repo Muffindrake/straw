@@ -173,16 +173,28 @@ char[]
 svc_ttv_fetch_default(string url)
 {
         import std.utf : validate;
+        import core.thread : Thread;
+        import core.time : seconds;
         char[] ret;
 
         url = url.encode;
+retry:
         auto client = HTTP(url);
         client.addRequestHeader("Client-ID", services[SVC_TWITCH].api);
         client.onReceive = (ubyte[] data) {
                 ret = cast (char[]) data.dup;
                 return data.length;
         };
-        client.perform;
+        try
+                client.perform(Yes.throwOnError);
+        catch (HTTPStatusException e)
+                if (e.status == 429) {
+                        Thread.sleep(seconds(10));
+                        goto retry;
+                } else {
+                        throw e;
+                }
+        ret.writeln;
         ret.validate;
         return ret;
 }

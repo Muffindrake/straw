@@ -235,10 +235,11 @@ void
 command_fetch()
 {
         import std.exception;
+        import std.json : JSONException;
 
         try
                 services[configuration.service_current].fetch();
-        catch (Exception e) {
+        catch (JSONException e) {
                 "failure fetching information: %s".writefln(e.msg);
                 return;
         }
