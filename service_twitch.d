@@ -8,14 +8,14 @@ import std.json;
 import std.uri : encode;
 
 struct SVC_TTV_INFO {
-        string username;
+        string user_id;
         string game_id;
-        string game;
         string status;
 }
 
 SVC_TTV_INFO[] svc_ttv_store;
-string[string] svc_ttv_games;
+string[string] svc_ttv_game_id_to_name;
+string[2][string] svc_ttv_user_id_to_login_display;
 
 private
 string[]
@@ -25,8 +25,9 @@ svc_ttv_check_game_ids()
         string[] arr;
         auto ret = appender(&arr);
 
-        foreach (i, ref e; svc_ttv_store) if (e.game_id !in svc_ttv_games)
-                ret.put(e.game_id);
+        foreach (i, ref e; svc_ttv_store)
+                if (e.game_id !in svc_ttv_game_id_to_name)
+                        ret.put(e.game_id);
         return arr;
 }
 
@@ -40,9 +41,9 @@ svc_ttv_fetch_game_by_ids()
         char[] res;
 
         auto page = svc_ttv_check_game_ids.chunks(100);
-        page_index = 0;
         if (page.length == 0)
                 return;
+        page_index = 0;
 inf:
         if (page_index > page.length - 1)
                 return;
@@ -52,25 +53,18 @@ inf:
                 a.put("id=%s&".format(e));
         a.put("id=%s".format(page[page_index][$ - 1]));
         res = url.svc_ttv_fetch_default;
-        JSONValue json = res.parseJSON;
+        auto json = res.parseJSON;
         if ("data" !in json || json["data"].type != JSONType.array)
                 throw new JSONException("invalid json");
-        const (JSONValue)* data = "data" in json;
+        const auto data = "data" in json;
         foreach (i, ref e; data.array) {
                 if ("id" !in e || e["id"].type != JSONType.string
                         || "name" !in e || e["name"].type != JSONType.string)
                         throw new JSONException("invalid json");
-                svc_ttv_games[e["id"].str] = e["name"].str;
+                svc_ttv_game_id_to_name[e["id"].str] = e["name"].str;
         }
         page_index++;
         goto inf;
-}
-
-void
-svc_ttv_match_game_id()
-{
-        foreach (i, ref e; svc_ttv_store) if (e.game_id in svc_ttv_games)
-                e.game = svc_ttv_games[e.game_id];
 }
 
 string
@@ -132,6 +126,49 @@ inf:
 }
 
 private
+void
+svc_ttv_fetch_user_logins_displays()
+{
+        import std.array : appender;
+        import std.range : chunks;
+        string url;
+        char[] res;
+        size_t page_index;
+
+        auto page = svc_ttv_store.chunks(100);
+        if (!page.length)
+                return;
+        page_index = 0;
+inf:
+        if (page_index > page.length - 1)
+                return;
+        url = services[SVC_TWITCH].url_api_base ~ "users?";
+        auto a = appender(&url);
+        foreach (i, ref e; page[page_index][0 .. $ - 1])
+                a.put("id=%s&".format(e.user_id));
+        a.put("id=%s".format(page[page_index][$ - 1].user_id));
+        res = url.svc_ttv_fetch_default;
+        auto json = res.parseJSON;
+        if ("data" !in json || json["data"].type != JSONType.array)
+                throw new JSONException("invalid json");
+        const auto data = "data" in json;
+        foreach (i, ref e; data.array) {
+                if ("id" !in e || e["id"].type != JSONType.string
+                        || "login" !in e
+                        || e["login"].type != JSONType.string
+                        || "display_name" !in e
+                        || e["display_name"].type != JSONType.string)
+                        throw new JSONException("invalid json");
+                else
+                        svc_ttv_user_id_to_login_display[e["id"].str]
+                                = [e["login"].str, e["display_name"].str];
+        }
+        page_index++;
+        goto inf;
+
+}
+
+private
 char[]
 svc_ttv_fetch_default(string url)
 {
@@ -143,10 +180,10 @@ svc_ttv_fetch_default(string url)
         client.addRequestHeader("Client-ID", services[SVC_TWITCH].api);
         client.onReceive = (ubyte[] data) {
                 ret = cast (char[]) data.dup;
-                ret.validate;
                 return data.length;
         };
         client.perform;
+        ret.validate;
         return ret;
 }
 
@@ -186,15 +223,15 @@ inf:
                 throw new JSONException("invalid json");
         const auto data = "data" in json;
         foreach (i, ref e; data.array) {
-                if ("user_name" !in e
-                        || e["user_name"].type != JSONType.string
+                if ("user_id" !in e
+                        || e["user_id"].type != JSONType.string
                         || "game_id" !in e
                         || e["game_id"].type != JSONType.string
                         || "title" !in e
                         || e["title"].type != JSONType.string)
                         throw new JSONException("invalid json");
-                serv.put(SVC_TTV_INFO(e["user_name"].str, e["game_id"].str,
-                                null, e["title"].str.strip));
+                serv.put(SVC_TTV_INFO(e["user_id"].str, e["game_id"].str,
+                                e["title"].str.strip));
         }
         page_index++;
         goto inf;
@@ -204,13 +241,19 @@ void
 svc_ttv_update()
 {
         import std.algorithm.sorting : sort;
+        import std.uni : toLower;
 
         services[SVC_TWITCH].user_id = services[SVC_TWITCH].user_name
                         .svc_ttv_fetch_user_id_from_name;
         svc_ttv_fetch_information;
-        svc_ttv_store.sort!("a.username.toUpper < b.username.toUpper");
         svc_ttv_fetch_game_by_ids;
-        svc_ttv_match_game_id;
+        svc_ttv_fetch_user_logins_displays;
+        svc_ttv_store.sort!(
+                (ref auto a, ref auto b) =>
+                        svc_ttv_user_id_to_login_display[a.user_id][0].toLower
+                        <
+                        svc_ttv_user_id_to_login_display[b.user_id][0].toLower
+                );
 }
 
 string
@@ -218,18 +261,33 @@ svc_ttv_browse(size_t index)
 {
         if (!svc_ttv_store.length || index > svc_ttv_store.length - 1)
                 return null;
-        return svc_ttv_store[index].username;
+        if (svc_ttv_store[index].user_id !in svc_ttv_user_id_to_login_display)
+                return "";
+        return svc_ttv_user_id_to_login_display
+                [svc_ttv_store[index].user_id][0];
 }
 
 void
 svc_ttv_listing()
 {
+        import std.uni : toLower;
+        import std.string : column;
+
         if (!svc_ttv_store.length) {
                 "no information to list".writeln;
                 return;
         }
-        foreach (i, ref e; svc_ttv_store)
-                "%02s %-12s <%s> %s".writefln(i, e.username, e.game, e.status);
+        foreach (i, ref e; svc_ttv_store) {
+                string* login = &svc_ttv_user_id_to_login_display[e.user_id][0];
+                string* disp = &svc_ttv_user_id_to_login_display[e.user_id][1];
+                string user = (*login).toLower != (*disp).toLower
+                        ? "%s(%s)".format(*disp, *login)
+                        : *disp;
+                "%02s %s <%s> %s".writefln(i,
+                                user,
+                                svc_ttv_game_id_to_name[e.game_id],
+                                e.status);
+        }
 }
 
 void
