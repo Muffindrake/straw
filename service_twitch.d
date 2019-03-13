@@ -1,11 +1,13 @@
 module service_twitch;
 
-import service;
 import std.format;
 import std.stdio;
 import std.net.curl;
 import std.json;
 import std.uri : encode;
+
+import service;
+import util;
 
 struct SVC_TTV_INFO {
         string user_id;
@@ -61,7 +63,8 @@ inf:
                 if ("id" !in e || e["id"].type != JSONType.string
                         || "name" !in e || e["name"].type != JSONType.string)
                         throw new JSONException("invalid json");
-                svc_ttv_game_id_to_name[e["id"].str] = e["name"].str;
+                if (e["id"].str != "")
+                        svc_ttv_game_id_to_name[e["id"].str] = e["name"].str;
         }
         page_index++;
         goto inf;
@@ -176,19 +179,25 @@ svc_ttv_fetch_default(string url)
         import core.thread : Thread;
         import core.time : seconds;
         char[] ret;
+        string after;
+        size_t timeout;
 
         url = url.encode;
 retry:
-        auto client = HTTP(url);
+        timeout = 0;
+        auto client = HTTP();
         client.addRequestHeader("Client-ID", services[SVC_TWITCH].api);
-        client.onReceive = (ubyte[] data) {
-                ret = cast (char[]) data.dup;
-                return data.length;
-        };
         try
-                client.perform;
+                ret = url.get(client);
         catch (HTTPStatusException e)
                 if (e.status == 429) {
+                        /* the twitch API resets the entire token bucket of 30
+                         * per client id after a minute */
+                        /* 10 seconds should be fair time for users without
+                         * ~1000 follows */
+                        timeout = 10;
+                        "note: rate limited, waiting %s seconds before retry"
+                                        .writefln(timeout);
                         Thread.sleep(seconds(10));
                         goto retry;
                 } else {
@@ -244,6 +253,7 @@ inf:
                 serv.put(SVC_TTV_INFO(e["user_id"].str, e["game_id"].str,
                                 e["title"].str.strip));
         }
+skip:
         page_index++;
         goto inf;
 }
@@ -283,21 +293,37 @@ svc_ttv_listing()
 {
         import std.uni : toLower;
         import std.string : column;
+        string login;
+        string disp;
+        string game;
+        string user;
+        alias user_id_map = svc_ttv_user_id_to_login_display;
+        alias game_id_map = svc_ttv_game_id_to_name;
 
         if (!svc_ttv_store.length) {
                 "no information to list".writeln;
                 return;
         }
         foreach (i, ref e; svc_ttv_store) {
-                string* login = &svc_ttv_user_id_to_login_display[e.user_id][0];
-                string* disp = &svc_ttv_user_id_to_login_display[e.user_id][1];
-                string user = (*login).toLower != (*disp).toLower
-                        ? "%s(%s)".format(*disp, *login)
-                        : *disp;
-                "%02s %s <%s> %s".writefln(i,
-                                user,
-                                svc_ttv_game_id_to_name[e.game_id],
-                                e.status);
+                if (e.user_id in user_id_map) {
+                        login = user_id_map[e.user_id][0];
+                        if (!login)
+                                login = "N/A";
+                        disp = user_id_map[e.user_id][1];
+                        if (!disp)
+                                disp = "N/A";
+                } else {
+                        login = "N/A";
+                        disp = "N/A";
+                }
+                if (e.game_id in game_id_map)
+                        game = game_id_map[e.game_id];
+                else
+                        game = "N/A";
+                user = (login.toLower != disp.toLower
+                        ? "%s(%s)".format(disp, login)
+                        : disp);
+                "%02s %s <%s> %s".writefln(i, user, game, e.status);
         }
 }
 
@@ -319,5 +345,16 @@ svc_ttv_info(string name)
         foreach (ref i, ref e; data.array[0].object)
                 "%18s: %s".writefln(i, e.type == JSONType.string
                                 ? e.str : e.toString);
+}
 
+void
+svc_ttv_store_clear()
+{
+        svc_ttv_store.length = 0;
+}
+
+size_t
+svc_ttv_online_count()
+{
+        return svc_ttv_store.length;
 }

@@ -15,6 +15,8 @@ struct SVC {
         void function() fetch;
         void function() listing;
         void function(string) info;
+        void function() cleanup;
+        size_t function() online_count;
 }
 
 enum {
@@ -59,4 +61,6 @@ static this()
         services[SVC_TWITCH].fetch = &svc_ttv_update;
         services[SVC_TWITCH].listing = &svc_ttv_listing;
         services[SVC_TWITCH].info = &svc_ttv_info;
+        services[SVC_TWITCH].cleanup = &svc_ttv_store_clear;
+        services[SVC_TWITCH].online_count = &svc_ttv_online_count;
 }

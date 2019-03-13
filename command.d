@@ -26,6 +26,7 @@ enum {
         cmd_setquality_string = "setqs",
         cmd_usage = "usage",
         cmd_user_get = "info",
+        cmd_user_get_with_username = "infon",
         cmd_user_set = "user"
 }
 
@@ -66,7 +67,9 @@ commands[cmd_setquality] = CMD(1, "set configuration quality by index");
 commands[cmd_setquality_string] = CMD(1,
         "set configuration quality using string");
 commands[cmd_usage] = CMD(1, "display usage information for a given command");
-commands[cmd_user_get] = CMD(1, "display channel information");
+commands[cmd_user_get] = CMD(1, "display channel information for given index");
+commands[cmd_user_get_with_username] = CMD(1,
+        "display channel information for username");
 commands[cmd_user_set] = CMD(1, "set current username on service");
 }
 
@@ -225,7 +228,7 @@ command_browse(size_t index)
 {
         string s = services[configuration.service_current].browse(index);
         if (!s) {
-                "no such index %s in the service store".writefln(index);
+                "no such index %s in current service store".writefln(index);
                 return;
         }
         s.command_browse_username;
@@ -234,16 +237,29 @@ command_browse(size_t index)
 void
 command_fetch()
 {
-        import std.exception;
         import std.json : JSONException;
+        import std.net.curl : CurlException, CurlTimeoutException;
 
-        try
+        try {
                 services[configuration.service_current].fetch();
-        catch (JSONException e) {
+        } catch (JSONException e) {
                 "failure fetching information: %s".writefln(e.msg);
-                return;
+                goto fail;
+        } catch (CurlTimeoutException e) {
+                "failure fetching information (timeout): %s"
+                                .writefln(e.msg);
+                goto fail;
+        } catch (CurlException e) {
+                "failure fetching information (other): %s"
+                                .writefln(e.msg);
+                goto fail;
         }
-        "successfully fetched service information".writeln;
+        "successfully fetched service information (%s online)".writefln(
+                        services[configuration.service_current].online_count());
+        return;
+fail:
+        import service;
+        services[configuration.service_current].cleanup();
 }
 
 void
@@ -283,7 +299,19 @@ command_run_with_username(immutable string name)
 }
 
 void
-command_user_get(immutable string name)
+command_user_get(size_t index)
+{
+        immutable string s = services[configuration.service_current]
+                        .browse(index);
+        if (!s) {
+                "no such index %s in current service store".writefln(index);
+                return;
+        }
+        s.command_user_get_with_username;
+}
+
+void
+command_user_get_with_username(immutable string name)
 {
         services[configuration.service_current].info(name);
 }
