@@ -253,7 +253,6 @@ inf:
                 serv.put(SVC_TTV_INFO(e["user_id"].str, e["game_id"].str,
                                 e["title"].str.strip));
         }
-skip:
         page_index++;
         goto inf;
 }
