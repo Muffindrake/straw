@@ -357,3 +357,10 @@ svc_ttv_online_count()
 {
         return svc_ttv_store.length;
 }
+
+void
+svc_ttv_popout(string name)
+{
+        import std.process : browse;
+        ("https://player.twitch.tv/?channel=" ~ name.encode).browse;
+}

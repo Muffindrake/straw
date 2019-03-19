@@ -1,5 +1,9 @@
 module service;
 
+import std.format;
+import std.string;
+import std.uri;
+
 struct SVC {
         immutable string name;
         immutable string name_short;
@@ -17,6 +21,7 @@ struct SVC {
         void function(string) info;
         void function() cleanup;
         size_t function() online_count;
+        void function(string) popout;
 }
 
 enum {
@@ -32,9 +37,6 @@ SVC_TWITCH: {
         url_api_base: "https://api.twitch.tv/helix/",
         api: "onsyu6idu0o41dl4ixkofx6pqq7ghn",
         username_to_url: (string name) {
-                import std.format : format;
-                import std.string : strip;
-                import std.uri : encode;
                 return "https://twitch.tv/" ~ name.dup.strip.encode;
         }
 },
@@ -44,9 +46,6 @@ SVC_PICARTO: {
         ident: "picarto",
         url_api_base: "https://api.picarto.tv/v1/",
         username_to_url: (string name) {
-                import std.format : format;
-                import std.string : strip;
-                import std.uri : encode;
                 return "https://picarto.tv/" ~ name.dup.strip.encode;
         }
 }
@@ -63,4 +62,5 @@ static this()
         services[SVC_TWITCH].info = &svc_ttv_info;
         services[SVC_TWITCH].cleanup = &svc_ttv_store_clear;
         services[SVC_TWITCH].online_count = &svc_ttv_online_count;
+        services[SVC_TWITCH].popout = &svc_ttv_popout;
 }

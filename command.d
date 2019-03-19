@@ -15,6 +15,8 @@ enum {
         cmd_list = "l",
         cmd_listconfig = "lc",
         cmd_listquality = "lq",
+        cmd_popout = "pop",
+        cmd_popout_with_username = "popn",
         cmd_quit = "quit",
         cmd_run = "run",
         cmd_run_with_username = "runs",
@@ -55,6 +57,9 @@ commands[cmd_list] = CMD(0,
 commands[cmd_listconfig] = CMD(0, "list configuration options");
 commands[cmd_listquality] = CMD(0,
         "obtain list of youtube-dl quality settings given in config file");
+commands[cmd_popout] = CMD(1, "open stream in popout web player");
+commands[cmd_popout_with_username] = CMD(1,
+        "open stream by username in popout web player");
 commands[cmd_quit] = CMD(0, "exit, quit, goodbye");
 commands[cmd_run] = CMD(1, "run stream in video player using given index");
 commands[cmd_run_with_username] = CMD(1,
@@ -314,4 +319,22 @@ void
 command_user_get_with_username(immutable string name)
 {
         services[configuration.service_current].info(name);
+}
+
+void
+command_popout(size_t index)
+{
+        immutable string s = services[configuration.service_current]
+                        .browse(index);
+        if (!s) {
+                "no such index %s in current service store".writefln(index);
+                return;
+        }
+        s.command_popout_with_username;
+}
+
+void
+command_popout_with_username(immutable string name)
+{
+        services[configuration.service_current].popout(name);
 }

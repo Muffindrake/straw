@@ -85,6 +85,12 @@ input_handle(ref char[] buf)
         case cmd_run_with_username:
                 args[1].idup.command_run_with_username;
                 break;
+        case cmd_popout:
+                args[1].idup.string_to_size.command_popout;
+                break;
+        case cmd_popout_with_username:
+                args[1].idup.command_popout_with_username;
+                break;
         default:
                 break;
         }
