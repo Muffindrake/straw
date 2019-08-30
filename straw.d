@@ -1,7 +1,7 @@
+import std.stdio;
 import setting;
 import service;
-
-import std.stdio;
+import util;
 
 void
 entrance()
@@ -10,10 +10,13 @@ entrance()
         import std.format : format;
         import std.string : strip;
         char[] buf;
+        bool end;
 inf:
-        if (buf.input_prompt(services[configuration.service_current].ident,
-                "> ")) {
-                writeln;
+        end = buf.input_prompt(services[configuration.service_current].ident,
+                "> ");
+        if (end) {
+                if (isatty(0))
+                        writeln;
                 return;
         }
         buf = buf.strip;

@@ -1,5 +1,6 @@
 module service_twitch;
 
+import std.conv;
 import std.format;
 import std.stdio;
 import std.net.curl;
@@ -8,6 +9,8 @@ import std.uri : encode;
 
 import service;
 import util;
+
+import colored;
 
 struct SVC_TTV_INFO {
         string user_id;
@@ -322,7 +325,11 @@ svc_ttv_listing()
                 user = (login.toLower != disp.toLower
                         ? "%s(%s)".format(disp, login)
                         : disp);
-                "%02s %s <%s> %s".writefln(i, user, game, e.status);
+                if (isatty(0))
+                        "%02s %s <%s> %s".writefln(i.text.underlined, user,
+                                        game.bold, e.status);
+                else
+                        "%02s %s <%s> %s".writefln(i, user, game, e.status);
         }
 }
 
@@ -332,8 +339,8 @@ svc_ttv_info(string name)
         string url;
         char[] res;
 
-        url = "%susers?login=%s".format(services[SVC_TWITCH].url_api_base
-                        , name.encode);
+        url = "%susers?login=%s".format(services[SVC_TWITCH].url_api_base,
+                        name.encode);
         res = url.svc_ttv_fetch_default;
         auto json = res.parseJSON;
         if ("data" !in json || json["data"].type != JSONType.array)

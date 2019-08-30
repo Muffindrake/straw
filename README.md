@@ -2,7 +2,7 @@
 a small command line interface to streaming services
 
 ```
-$ rlwrap straw
+$ straw
 twitch> user qttsix
 username set to `qttsix`
 twitch> fl
@@ -21,26 +21,24 @@ successfully fetched service information (37 online)
 ```
 The `fl` command fetches information from the stream service according to the
 user set beforehand, before listing all information. Use `help` for a list of
-commands.
+commands. If a terminal is detected, eye-bleaching highlighting is used.
 
 # installation
 
 ```
 $ git clone https://github.com/muffindrake/straw
 $ cd straw
-$ make
+$ dub build
 ```
-
-The Makefile currently requires LDC2 as a D compiler, but the program will build
-just fine by compiling all `*.d` files together using any other D compiler.
 
 # dependencies
 - a recent LDC2
+- GNU readline
+- dub
 - mpv
 - youtube-dl
 - sh-compatible shell
 - libcurl (part of the D standard library)
-- optional, but recommended: https://github.com/hanslub42/rlwrap
 
 # MAYBE-TODO
 - authentication to circumvent draconian rate limits

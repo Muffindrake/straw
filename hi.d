@@ -5,20 +5,19 @@ import std.stdio;
 import command;
 import util;
 
+import colored;
+
 bool
 input_prompt(ref char[] buf, immutable string message, immutable string p)
 {
-        import std.string : chop;
-        bool ret;
+        import std.string : chop, format;
+        bool eof;
 
-        message.write;
-        p.write;
-        ret = !buf.readln;
-        if (ret)
-                buf = "".dup;
+        if (isatty(0))
+                buf = "%s%s".format(message.bold, p.bold).rlw(eof).dup;
         else
-                buf = buf.chop;
-        return ret;
+                buf = readln.dup;
+        return eof;
 }
 
 void
