@@ -2,6 +2,7 @@ module util;
 
 extern (C) int isatty(int);
 extern (C) private char* readline(const char*);
+extern (C) private void add_history(char*);
 
 string
 rlw(string prompt, ref bool eof)
@@ -15,6 +16,7 @@ rlw(string prompt, ref bool eof)
                 return "";
         }
         eof = 0;
+        a.add_history;
         return a.fromStringz.idup;
 }
 
