@@ -23,14 +23,9 @@ rlw(string prompt, ref bool eof)
 size_t
 string_to_size(immutable string s)
 {
-        import std.conv : to, ConvException, ConvOverflowException;
+        import std.conv : to;
         size_t ret;
 
-        try
-                ret = to!size_t(s);
-        catch (ConvOverflowException)
-                ret = 0;
-        catch (ConvException)
-                ret = 0;
+        ret = to!size_t(s);
         return ret;
 }

@@ -3,6 +3,7 @@ module external;
 import std.exception;
 import std.format;
 import std.process;
+import std.stdio;
 
 import setting;
 
@@ -57,4 +58,25 @@ void
 browser_run(immutable string url)
 {
         browse(url);
+}
+
+void
+weechat_chat_join(immutable string buffer, immutable string channel)
+{
+        File f;
+        string fifo_path = environment.get("WEECHAT_HOME", environment["HOME"] ~ "/.weechat");
+
+        fifo_path ~= "/weechat_fifo";
+        try {
+                f = File(fifo_path, "w");
+        } catch (ErrnoException e) {
+                `Unable to open %s: %s`.writefln(fifo_path, e);
+                return;
+        }
+        try {
+                f.writefln("%s */join #%s", buffer, channel);
+        } catch (ErrnoException e) {
+                `An error has occurred when writing to %s: %s`.writefln(fifo_path, e);
+                return;
+        }
 }

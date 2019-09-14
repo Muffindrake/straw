@@ -2,9 +2,9 @@ module service_twitch;
 
 import std.conv;
 import std.format;
-import std.stdio;
-import std.net.curl;
 import std.json;
+import std.net.curl;
+import std.stdio;
 import std.uri : encode;
 
 import service;
@@ -370,4 +370,17 @@ svc_ttv_popout(string name)
 {
         import std.process : browse;
         ("https://player.twitch.tv/?channel=" ~ name.encode).browse;
+}
+
+void
+svc_ttv_chat(string name)
+{
+        import setting : configuration;
+        import external : weechat_chat_join;
+        import std.process : browse;
+
+        if (configuration.ttv_webchat)
+                "https://www.twitch.tv/popout/%s/chat?popout=".format(name.encode).browse;
+        else
+                weechat_chat_join(configuration.weechat_ttv_buffer, name);
 }

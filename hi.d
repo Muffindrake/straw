@@ -24,6 +24,7 @@ void
 input_handle(ref char[] buf)
 {
         import std.array : split;
+        import std.conv : ConvException, ConvOverflowException;
         char[][] args = buf.split(' ');
 
         if (!args.length)
@@ -41,7 +42,7 @@ input_handle(ref char[] buf)
         }
         if (args.length < 2)
                 goto fail;
-        switch (args[0]) {
+        try switch (args[0]) {
         case cmd_user_get:
                 args[1].idup.string_to_size.command_user_get;
                 break;
@@ -90,11 +91,25 @@ input_handle(ref char[] buf)
         case cmd_popout_with_username:
                 args[1].idup.command_popout_with_username;
                 break;
+        case cmd_chat:
+                args[1].idup.string_to_size.command_chat;
+                break;
+        case cmd_chat_string:
+                args[1].idup.command_chat_string;
+                break;
         default:
                 break;
+        } catch (ConvOverflowException) {
+                goto fail_conv;
+        } catch (ConvException) {
+                goto fail_conv;
         }
 
 fail:
         if (args[0] !in commands)
                 "command `%s` not found - try `help`".writefln(args[0]);
+        return;
+fail_conv:
+        "The given index was not a valid number, or out of range.".writeln;
+        return;
 }

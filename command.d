@@ -1,8 +1,9 @@
 module command;
 
+import std.stdio;
+
 import setting;
 import service;
-import std.stdio;
 
 enum {
         cmd_browse = "surf",
@@ -29,7 +30,9 @@ enum {
         cmd_usage = "usage",
         cmd_user_get = "info",
         cmd_user_get_with_username = "infon",
-        cmd_user_set = "user"
+        cmd_user_set = "user",
+        cmd_chat = "chat",
+        cmd_chat_string = "chats",
 }
 
 struct CMD {
@@ -76,25 +79,26 @@ commands[cmd_user_get] = CMD(1, "display channel information for given index");
 commands[cmd_user_get_with_username] = CMD(1,
         "display channel information for username");
 commands[cmd_user_set] = CMD(1, "set current username on service");
+commands[cmd_chat] = CMD(1, "open chat for given index");
+commands[cmd_chat_string] = CMD(1, "open chat for given string");
+}
+
+private
+void
+cmdprint(T)(T a)
+{
+        `%s %s: "%s"`.writefln(typeof(a).stringof, a.stringof, a);
 }
 
 void
 command_listconfig()
 {
-        import std.stdio : writefln;
-        import std.format : format;
-        auto cfg = configuration;
-
-        "%s %s: %s".writefln(
-                        typeof (cfg.terminal).stringof,
-                        cfg.terminal.stringof,
-                        cfg.terminal is null
-                                ? "(null)" : `"%s"`.format(cfg.terminal));
-        "%s %s: %s".writefln(
-                        typeof (cfg.quality).stringof,
-                        cfg.quality.stringof,
-                        cfg.quality is null
-                                ? "(null)" : `"%s"`.format(cfg.quality));
+        with (configuration) {
+                cmdprint(terminal);
+                cmdprint(quality);
+                cmdprint(weechat_ttv_buffer);
+                cmdprint(ttv_webchat);
+        }
 }
 
 void
@@ -337,4 +341,21 @@ void
 command_popout_with_username(immutable string name)
 {
         services[configuration.service_current].popout(name);
+}
+
+void
+command_chat(size_t index)
+{
+        immutable string s = services[configuration.service_current].browse(index);
+        if (!s) {
+                "no such index %s in current service store".writefln(index);
+                return;
+        }
+        s.command_chat_string;
+}
+
+void
+command_chat_string(immutable string name)
+{
+        services[configuration.service_current].chat(name);
 }

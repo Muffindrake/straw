@@ -22,6 +22,7 @@ struct SVC {
         void function() cleanup;
         size_t function() online_count;
         void function(string) popout;
+        void function(string) chat;
 }
 
 enum {
@@ -55,12 +56,15 @@ static this()
 {
         import service_twitch;
 
-        services[SVC_TWITCH].update = &svc_ttv_update;
-        services[SVC_TWITCH].browse = &svc_ttv_browse;
-        services[SVC_TWITCH].fetch = &svc_ttv_update;
-        services[SVC_TWITCH].listing = &svc_ttv_listing;
-        services[SVC_TWITCH].info = &svc_ttv_info;
-        services[SVC_TWITCH].cleanup = &svc_ttv_store_clear;
-        services[SVC_TWITCH].online_count = &svc_ttv_online_count;
-        services[SVC_TWITCH].popout = &svc_ttv_popout;
+        with (services[SVC_TWITCH]) {
+                update = &svc_ttv_update;
+                browse = &svc_ttv_browse;
+                fetch = &svc_ttv_update;
+                listing = &svc_ttv_listing;
+                info = &svc_ttv_info;
+                cleanup = &svc_ttv_store_clear;
+                online_count = &svc_ttv_online_count;
+                popout = &svc_ttv_popout;
+                chat = &svc_ttv_chat;
+        }
 }

@@ -34,6 +34,7 @@ main(string[] args)
         configuration.service_current = SVC_TWITCH;
         configuration.quality = quality_table[1];
         configuration.terminal = "urxvt";
+        configuration.weechat_ttv_buffer = "irc.server.twitch";
         services[SVC_TWITCH].user_name = "muffindrake";
         try
                 entrance;
