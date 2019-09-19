@@ -24,7 +24,7 @@ void
 input_handle(ref char[] buf)
 {
         import std.array : split;
-        import std.conv : ConvException, ConvOverflowException;
+        import std.conv : to, ConvException, ConvOverflowException;
         char[][] args = buf.split(' ');
 
         if (!args.length)
@@ -44,7 +44,7 @@ input_handle(ref char[] buf)
                 goto fail;
         try switch (args[0]) {
         case cmd_user_get:
-                args[1].idup.string_to_size.command_user_get;
+                args[1].idup.to!size_t.command_user_get;
                 break;
         case cmd_user_get_with_username:
                 args[1].idup.command_user_get_with_username;
@@ -53,25 +53,25 @@ input_handle(ref char[] buf)
                 args[1].idup.command_user_set;
                 break;
         case cmd_getquality:
-                args[1].idup.string_to_size.command_getquality;
+                args[1].idup.to!size_t.command_getquality;
                 break;
         case cmd_getquality_with_username:
                 args[1].idup.command_getquality_username;
                 break;
         case cmd_browse:
-                args[1].idup.string_to_size.command_browse;
+                args[1].idup.to!size_t.command_browse;
                 break;
         case cmd_browse_with_username:
                 args[1].idup.command_browse_username;
                 break;
         case cmd_setquality:
-                args[1].idup.string_to_size.command_setquality;
+                args[1].idup.to!size_t.command_setquality;
                 break;
         case cmd_setquality_string:
                 args[1].idup.command_setquality_string;
                 break;
         case cmd_service:
-                args[1].idup.string_to_size.command_service;
+                args[1].idup.to!size_t.command_service;
                 break;
         case cmd_service_with_ident:
                 args[1].idup.command_service_ident;
@@ -80,19 +80,19 @@ input_handle(ref char[] buf)
                 args[1].idup.command_usage;
                 break;
         case cmd_run:
-                args[1].idup.string_to_size.command_run;
+                args[1].idup.to!size_t.command_run;
                 break;
         case cmd_run_with_username:
                 args[1].idup.command_run_with_username;
                 break;
         case cmd_popout:
-                args[1].idup.string_to_size.command_popout;
+                args[1].idup.to!size_t.command_popout;
                 break;
         case cmd_popout_with_username:
                 args[1].idup.command_popout_with_username;
                 break;
         case cmd_chat:
-                args[1].idup.string_to_size.command_chat;
+                args[1].idup.to!size_t.command_chat;
                 break;
         case cmd_chat_string:
                 args[1].idup.command_chat_string;

@@ -19,13 +19,3 @@ rlw(string prompt, ref bool eof)
         a.add_history;
         return a.fromStringz.idup;
 }
-
-size_t
-string_to_size(immutable string s)
-{
-        import std.conv : to;
-        size_t ret;
-
-        ret = to!size_t(s);
-        return ret;
-}

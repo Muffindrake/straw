@@ -5,15 +5,15 @@ import std.string;
 import std.uri;
 
 struct SVC {
-        immutable string name;
-        immutable string name_short;
-        immutable string ident;
-        immutable string url_api_base;
+        string name;
+        string name_short;
+        string ident;
+        string url_api_base;
         string api;
         string user_name;
         string user_id;
 
-        string delegate(string) username_to_url;
+        string function(string) username_to_url;
         void function() update;
         string function(size_t) browse;
         void function() fetch;

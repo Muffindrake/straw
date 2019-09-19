@@ -74,7 +74,7 @@ inf:
 }
 
 string
-svc_ttv_fetch_user_id_from_name(immutable string name)
+svc_ttv_fetch_user_id_from_name(string name)
 {
         string url;
         char[] res;
@@ -283,7 +283,7 @@ string
 svc_ttv_browse(size_t index)
 {
         if (!svc_ttv_store.length || index > svc_ttv_store.length - 1)
-                return null;
+                return "";
         if (svc_ttv_store[index].user_id !in svc_ttv_user_id_to_login_display)
                 return "";
         return svc_ttv_user_id_to_login_display

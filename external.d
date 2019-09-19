@@ -19,7 +19,7 @@ class EXIT : Exception {
 }
 
 char[]
-youtubedl_quality(immutable string query)
+youtubedl_quality(string query)
 {
         import std.process : escapeShellFileName;
 
@@ -36,14 +36,14 @@ youtubedl_quality(immutable string query)
 bool
 session_graphical()
 {
-        return environment.get("DISPLAY") !is null;
+        return !!environment.get("DISPLAY");
 }
 
 void
-mpv_run(immutable string url, immutable string quality)
+mpv_run(string url, string quality)
 {
         string terminal = configuration.terminal;
-        if (terminal is null)
+        if (!terminal)
                 terminal = "xterm";
         if (session_graphical)
                 (`nohup %s -e mpv "%s" --ytdl-format="%s"`
@@ -55,13 +55,13 @@ mpv_run(immutable string url, immutable string quality)
 }
 
 void
-browser_run(immutable string url)
+browser_run(string url)
 {
         browse(url);
 }
 
 void
-weechat_chat_join(immutable string buffer, immutable string channel)
+weechat_chat_join(string buffer, string channel)
 {
         File f;
         string fifo_path = environment.get("WEECHAT_HOME", environment["HOME"] ~ "/.weechat");

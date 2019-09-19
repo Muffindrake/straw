@@ -117,7 +117,7 @@ command_help()
 }
 
 void
-command_usage(immutable string command)
+command_usage(string command)
 {
         if (command in commands) {
                 CMD tmp = commands[command];
@@ -151,7 +151,7 @@ command_setquality(size_t index)
 }
 
 void
-command_setquality_string(immutable string quality)
+command_setquality_string(string quality)
 {
         configuration.quality = quality;
         "quality `%s` successfully set".writefln(quality);
@@ -170,7 +170,7 @@ command_service(size_t index)
 }
 
 void
-command_service_ident(immutable string ident)
+command_service_ident(string ident)
 {
         foreach (i, ref e; services) if (e.ident == ident) {
                 configuration.service_current = i;
@@ -189,7 +189,7 @@ command_service_list()
 }
 
 void
-command_browse_username(immutable string name)
+command_browse_username(string name)
 {
         import std.process : browse;
         import external;
@@ -214,7 +214,7 @@ command_getquality(size_t index)
 }
 
 void
-command_getquality_username(immutable string name)
+command_getquality_username(string name)
 {
         import external;
         string url;
@@ -225,7 +225,7 @@ command_getquality_username(immutable string name)
 }
 
 void
-command_user_set(immutable string name)
+command_user_set(string name)
 {
         services[configuration.service_current].user_name = name;
         services[configuration.service_current].user_id = null;
@@ -287,7 +287,7 @@ command_fetch_list()
 void
 command_run(size_t index)
 {
-        immutable string s = services[configuration.service_current]
+        string s = services[configuration.service_current]
                         .browse(index);
         if (!s) {
                 "no such index %s in current service store".writefln(index);
@@ -297,11 +297,19 @@ command_run(size_t index)
 }
 
 void
-command_run_with_username(immutable string name)
+command_run_with_username(string name)
 {
         import external;
-        string url = services[configuration.service_current]
-                        .username_to_url(name);
+        /*string url = services[configuration.service_current]
+                        .username_to_url(name);*/
+        string url;
+        if (!services.length || services.length - 1 < configuration.service_current) {
+                "What the fuck".writeln;
+                services.writeln;
+                return;
+        } else {
+                url = services[configuration.service_current].username_to_url(name);
+        }
 
         "running stream %s in external video player".writefln(url);
         url.mpv_run(configuration.quality);
@@ -310,7 +318,7 @@ command_run_with_username(immutable string name)
 void
 command_user_get(size_t index)
 {
-        immutable string s = services[configuration.service_current]
+        string s = services[configuration.service_current]
                         .browse(index);
         if (!s) {
                 "no such index %s in current service store".writefln(index);
@@ -320,7 +328,7 @@ command_user_get(size_t index)
 }
 
 void
-command_user_get_with_username(immutable string name)
+command_user_get_with_username(string name)
 {
         services[configuration.service_current].info(name);
 }
@@ -328,7 +336,7 @@ command_user_get_with_username(immutable string name)
 void
 command_popout(size_t index)
 {
-        immutable string s = services[configuration.service_current]
+        string s = services[configuration.service_current]
                         .browse(index);
         if (!s) {
                 "no such index %s in current service store".writefln(index);
@@ -338,7 +346,7 @@ command_popout(size_t index)
 }
 
 void
-command_popout_with_username(immutable string name)
+command_popout_with_username(string name)
 {
         services[configuration.service_current].popout(name);
 }
@@ -346,7 +354,7 @@ command_popout_with_username(immutable string name)
 void
 command_chat(size_t index)
 {
-        immutable string s = services[configuration.service_current].browse(index);
+        string s = services[configuration.service_current].browse(index);
         if (!s) {
                 "no such index %s in current service store".writefln(index);
                 return;
@@ -355,7 +363,7 @@ command_chat(size_t index)
 }
 
 void
-command_chat_string(immutable string name)
+command_chat_string(string name)
 {
         services[configuration.service_current].chat(name);
 }
