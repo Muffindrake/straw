@@ -300,16 +300,8 @@ void
 command_run_with_username(string name)
 {
         import external;
-        /*string url = services[configuration.service_current]
-                        .username_to_url(name);*/
-        string url;
-        if (!services.length || services.length - 1 < configuration.service_current) {
-                "What the fuck".writeln;
-                services.writeln;
-                return;
-        } else {
-                url = services[configuration.service_current].username_to_url(name);
-        }
+        string url = services[configuration.service_current]
+                        .username_to_url(name);
 
         "running stream %s in external video player".writefln(url);
         url.mpv_run(configuration.quality);
