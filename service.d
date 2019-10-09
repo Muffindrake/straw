@@ -38,8 +38,6 @@ SVC_TWITCH: {
         url_api_base: "https://api.twitch.tv/helix/",
         api: "onsyu6idu0o41dl4ixkofx6pqq7ghn",
         username_to_url: (string name) {
-                import std.stdio;
-                "I will never run under dmd".writeln;
                 return "https://twitch.tv/" ~ name.dup.strip.encode;
         }
 },
